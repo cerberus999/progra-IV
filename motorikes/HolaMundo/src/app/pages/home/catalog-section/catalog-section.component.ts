@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MotorcycleService } from '../../../core/services/motorcycle.service';
@@ -42,26 +42,30 @@ export class CatalogSectionComponent implements OnInit {
     { label: 'OFF-ROAD', value: 'OFF-ROAD' }
   ];
 
-  constructor(private motorcycleService: MotorcycleService) { }
+  constructor(
+    private motorcycleService: MotorcycleService,
+    private cdr: ChangeDetectorRef,
+  ) { }
 
   ngOnInit(): void {
     this.motorcycleService.getAll().subscribe(motos => {
       this.allMotorcycles = motos;
       this.applyFilter();
+      this.cdr.markForCheck();
     });
   }
 
   selectTab(tabValue: string): void {
     if (this.activeTab === tabValue) return;
-    
+
     this.isLoading = true;
     this.activeTab = tabValue;
-    this.visibleLimit = 4; // Reset limit when tab changes
+    this.visibleLimit = 4;
 
-    // Simulate smooth asynchronous load for animations
     setTimeout(() => {
       this.applyFilter();
       this.isLoading = false;
+      this.cdr.markForCheck();
     }, 350);
   }
 
@@ -84,5 +88,6 @@ export class CatalogSectionComponent implements OnInit {
   loadMore(): void {
     this.visibleLimit += 4;
     this.updateVisibleList();
+    this.cdr.markForCheck();
   }
 }

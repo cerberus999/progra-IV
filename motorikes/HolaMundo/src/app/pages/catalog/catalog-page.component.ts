@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -32,56 +32,66 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
   hasActiveFilters = false;
 
   private sub = new Subscription();
+  private isFirstFilter = true;
 
   constructor(
     private motorcycleService: MotorcycleService,
     private filterService: FilterService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
-    // Load all motorcycles first
     this.motorcycleService.getAll().subscribe(motos => {
       this.allMotorcycles = motos;
       this.initFiltersFromUrlAndSubscribe();
+      this.cdr.markForCheck();
     });
   }
 
   private initFiltersFromUrlAndSubscribe(): void {
-    // 1. Read initial query params from URL
     const queryParams = this.route.snapshot.queryParams;
     const initialBrands = queryParams['marca'] ? queryParams['marca'].split(',') : [];
     const initialTypes = queryParams['tipo'] ? queryParams['tipo'].split(',') : [];
     const initialMaxCc = queryParams['max_cc'] ? parseInt(queryParams['max_cc'], 10) : null;
     const initialMaxCv = queryParams['max_cv'] ? parseInt(queryParams['max_cv'], 10) : null;
 
-    // Apply URL params to filter service state
-    this.filterService.updateFilters({
+    const initial: FilterState = {
       brands: initialBrands,
       types: initialTypes,
       maxCilindrada: initialMaxCc,
-      maxPotencia: initialMaxCv
-    });
+      maxPotencia: initialMaxCv,
+      minCilindrada: null,
+      minPotencia: null,
+      minPrice: null,
+      maxPrice: null
+    };
 
-    // 2. Subscribe to filter service updates to perform filter logic & update URL
+    this.executeFilterLogic(initial);
+    this.activeFilters = initial;
+    this.hasActiveFilters =
+      initialBrands.length > 0 || initialTypes.length > 0 || initialMaxCc !== null || initialMaxCv !== null;
+
+    this.filterService.updateFilters(initial);
+
     this.sub.add(
       this.filterService.filters$.subscribe(state => {
+        if (this.isFirstFilter) {
+          this.isFirstFilter = false;
+          return;
+        }
+
         this.activeFilters = state;
-        this.hasActiveFilters = 
-          state.brands.length > 0 || 
-          state.types.length > 0 || 
-          state.maxCilindrada !== null || 
+        this.hasActiveFilters =
+          state.brands.length > 0 ||
+          state.types.length > 0 ||
+          state.maxCilindrada !== null ||
           state.maxPotencia !== null;
 
-        this.isLoading = true;
-
-        // Perform filter and update visible list with a slight delay for smooth visual transition
-        setTimeout(() => {
-          this.executeFilterLogic(state);
-          this.syncFiltersToUrl(state);
-          this.isLoading = false;
-        }, 300);
+        this.executeFilterLogic(state);
+        this.syncFiltersToUrl(state);
+        this.cdr.markForCheck();
       })
     );
   }

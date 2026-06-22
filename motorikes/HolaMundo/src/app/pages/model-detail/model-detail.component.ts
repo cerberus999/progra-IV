@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { MotorcycleService } from '../../core/services/motorcycle.service';
 import { Motorcycle } from '../../core/models/motorcycle.model';
 import { BrandBadgeComponent } from '../../shared/components/brand-badge/brand-badge.component';
@@ -37,7 +37,8 @@ export class ModelDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private motorcycleService: MotorcycleService
+    private motorcycleService: MotorcycleService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,24 +54,30 @@ export class ModelDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadMotorcycle(slug: string): void {
-    this.motorcycleService.getBySlug(slug).subscribe(moto => {
-      this.motorcycle = moto;
+    this.sub.add(
+      this.motorcycleService.getBySlug(slug).subscribe(moto => {
+        this.motorcycle = moto;
+        this.cdr.detectChanges();
 
-      if (moto) {
-        this.adjacentModels = this.motorcycleService.getAdjacentModels(moto.id);
-        
-        // Calculate index
-        this.motorcycleService.getAll().subscribe(all => {
-          this.totalCount = all.length;
-          this.currentIndex = all.findIndex(m => m.id === moto.id);
-        });
-      }
+        if (moto) {
+          this.sub.add(
+            forkJoin([
+              this.motorcycleService.getAdjacentModels(moto.id),
+              this.motorcycleService.getAll()
+            ]).subscribe(([adjacent, all]) => {
+              this.adjacentModels = adjacent;
+              this.totalCount = all.length;
+              this.currentIndex = all.findIndex(m => m.id === moto.id);
+              this.cdr.detectChanges();
+            })
+          );
+        }
 
-      // Scroll to top when loading a new model
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

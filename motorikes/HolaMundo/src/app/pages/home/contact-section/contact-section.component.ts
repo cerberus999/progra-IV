@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MotorcycleService } from '../../../core/services/motorcycle.service';
@@ -30,7 +30,8 @@ export class ContactSectionComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private motorcycleService: MotorcycleService
+    private motorcycleService: MotorcycleService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -71,6 +72,7 @@ export class ContactSectionComponent implements OnInit {
         brandName,
         models
       }));
+      this.cdr.detectChanges();
     });
   }
 
