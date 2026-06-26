@@ -1,7 +1,7 @@
+@use './app/assets/styles/global.scss';
+@use './app/assets/styles/animations.scss';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './app/assets/styles/global.scss';
-@import './app/assets/styles/animations.scss';
 

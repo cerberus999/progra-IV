@@ -16,10 +16,13 @@ export class CatalogFilterComponent implements OnInit, OnDestroy {
   availableBrands: Brand[] = [];
   availableTypes = ['SPORT', 'NAKED', 'TRACK', 'SCOOTER', 'COMMUTER', 'OFF-ROAD'];
   
+  searchTerm = '';
   selectedBrands: string[] = [];
   selectedTypes: string[] = [];
   maxCilindrada: number | null = null;
   maxPotencia: number | null = null;
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
 
   private sub = new Subscription();
 
@@ -31,13 +34,15 @@ export class CatalogFilterComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.availableBrands = this.motorcycleService.getBrands();
     
-    // Subscribe to filter state updates to sync UI
     this.sub.add(
       this.filterService.filters$.subscribe(state => {
+        this.searchTerm = state.searchTerm;
         this.selectedBrands = state.brands;
         this.selectedTypes = state.types;
         this.maxCilindrada = state.maxCilindrada;
         this.maxPotencia = state.maxPotencia;
+        this.minPrice = state.minPrice;
+        this.maxPrice = state.maxPrice;
       })
     );
   }
@@ -50,6 +55,11 @@ export class CatalogFilterComponent implements OnInit, OnDestroy {
     this.filterService.toggleType(type);
   }
 
+  onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.filterService.setSearchTerm(input.value);
+  }
+
   onCilindradaChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = parseInt(input.value, 10);
@@ -60,6 +70,18 @@ export class CatalogFilterComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const value = parseInt(input.value, 10);
     this.filterService.updateFilters({ maxPotencia: value });
+  }
+
+  onMinPriceChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value ? parseInt(input.value, 10) : null;
+    this.filterService.updateFilters({ minPrice: value });
+  }
+
+  onMaxPriceChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value ? parseInt(input.value, 10) : null;
+    this.filterService.updateFilters({ maxPrice: value });
   }
 
   resetAll(): void {

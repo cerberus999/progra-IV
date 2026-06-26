@@ -69,6 +69,7 @@ export function adaptMotoResponse(dto: MotoResponseDto): Motorcycle {
     brand: dto.distribuidorNombre.toLowerCase(),
     badge_special: undefined,
     specs,
-    price: dto.precioVenta
+    price: dto.precioVenta,
+    stock: dto.stock
   };
 }

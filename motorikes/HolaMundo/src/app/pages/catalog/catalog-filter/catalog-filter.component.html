@@ -13,7 +13,22 @@
   </div>
 
   <div class="flex flex-col gap-6">
-    
+
+    <!-- Model Search -->
+    <div>
+      <h4 class="font-rajdhani font-semibold text-xs tracking-widest text-outline uppercase mb-3">Modelo</h4>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-lg">search</span>
+        <input
+          type="text"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+          placeholder="Buscar por modelo..."
+          class="w-full bg-surface-container/40 border border-border-hairline rounded-lg pl-9 pr-3 py-2 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:border-primary transition-colors font-body-md"
+        />
+      </div>
+    </div>
+
     <!-- Brands Checkboxes -->
     <div>
       <h4 class="font-rajdhani font-semibold text-xs tracking-widest text-outline uppercase mb-3">Marcas</h4>
@@ -95,6 +110,38 @@
       <div class="flex justify-between text-[10px] text-outline-variant mt-1.5 font-label-sm">
         <span>8 CV</span>
         <span>320 CV</span>
+      </div>
+    </div>
+
+    <!-- Price Range -->
+    <div>
+      <h4 class="font-rajdhani font-semibold text-xs tracking-widest text-outline uppercase mb-3">Rango de Precio ($)</h4>
+      <div class="flex items-center gap-3">
+        <div class="flex-1">
+          <label class="font-label-sm text-[10px] text-outline-variant uppercase tracking-wider block mb-1">Mín.</label>
+          <input
+            type="number"
+            [value]="minPrice ?? ''"
+            (input)="onMinPriceChange($event)"
+            placeholder="0"
+            min="0"
+            max="100000"
+            class="w-full bg-surface-container/40 border border-border-hairline rounded-lg px-3 py-2 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:border-primary transition-colors font-body-md"
+          />
+        </div>
+        <span class="text-outline-variant mt-5 text-xs">—</span>
+        <div class="flex-1">
+          <label class="font-label-sm text-[10px] text-outline-variant uppercase tracking-wider block mb-1">Máx.</label>
+          <input
+            type="number"
+            [value]="maxPrice ?? ''"
+            (input)="onMaxPriceChange($event)"
+            placeholder="50000"
+            min="0"
+            max="100000"
+            class="w-full bg-surface-container/40 border border-border-hairline rounded-lg px-3 py-2 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:border-primary transition-colors font-body-md"
+          />
+        </div>
       </div>
     </div>
 

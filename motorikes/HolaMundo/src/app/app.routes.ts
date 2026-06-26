@@ -2,6 +2,9 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { CatalogPageComponent } from './pages/catalog/catalog-page.component';
 import { ModelDetailComponent } from './pages/model-detail/model-detail.component';
+import { LoginComponent } from './pages/auth/login.component';
+import { ClienteHistoryComponent } from './pages/cliente-history/cliente-history.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { 
@@ -21,6 +24,19 @@ export const routes: Routes = [
     component: ModelDetailComponent,
     title: 'HirosimaBikeMotors — Modelo',
     data: { animation: 'detail' }
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+    title: 'HirosimaBikeMotors — Iniciar Sesión',
+    data: { animation: 'login' }
+  },
+  {
+    path: 'mi-historial',
+    component: ClienteHistoryComponent,
+    canActivate: [authGuard(['cliente', 'admin'])],
+    title: 'HirosimaBikeMotors — Mis Unidades',
+    data: { animation: 'history' }
   },
   { 
     path: '**', 

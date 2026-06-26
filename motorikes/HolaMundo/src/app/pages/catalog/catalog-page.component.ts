@@ -52,26 +52,29 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
 
   private initFiltersFromUrlAndSubscribe(): void {
     const queryParams = this.route.snapshot.queryParams;
+    const initialSearch = queryParams['search'] ?? '';
     const initialBrands = queryParams['marca'] ? queryParams['marca'].split(',') : [];
     const initialTypes = queryParams['tipo'] ? queryParams['tipo'].split(',') : [];
     const initialMaxCc = queryParams['max_cc'] ? parseInt(queryParams['max_cc'], 10) : null;
     const initialMaxCv = queryParams['max_cv'] ? parseInt(queryParams['max_cv'], 10) : null;
+    const initialMinPrice = queryParams['min_price'] ? parseInt(queryParams['min_price'], 10) : null;
+    const initialMaxPrice = queryParams['max_price'] ? parseInt(queryParams['max_price'], 10) : null;
 
     const initial: FilterState = {
+      searchTerm: initialSearch,
       brands: initialBrands,
       types: initialTypes,
       maxCilindrada: initialMaxCc,
       maxPotencia: initialMaxCv,
       minCilindrada: null,
       minPotencia: null,
-      minPrice: null,
-      maxPrice: null
+      minPrice: initialMinPrice,
+      maxPrice: initialMaxPrice
     };
 
     this.executeFilterLogic(initial);
     this.activeFilters = initial;
-    this.hasActiveFilters =
-      initialBrands.length > 0 || initialTypes.length > 0 || initialMaxCc !== null || initialMaxCv !== null;
+    this.hasActiveFilters = this.computeHasActiveFilters(initial);
 
     this.filterService.updateFilters(initial);
 
@@ -83,11 +86,7 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
         }
 
         this.activeFilters = state;
-        this.hasActiveFilters =
-          state.brands.length > 0 ||
-          state.types.length > 0 ||
-          state.maxCilindrada !== null ||
-          state.maxPotencia !== null;
+        this.hasActiveFilters = this.computeHasActiveFilters(state);
 
         this.executeFilterLogic(state);
         this.syncFiltersToUrl(state);
@@ -96,8 +95,26 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     );
   }
 
+  private computeHasActiveFilters(state: FilterState): boolean {
+    return (
+      state.searchTerm !== '' ||
+      state.brands.length > 0 ||
+      state.types.length > 0 ||
+      state.maxCilindrada !== null ||
+      state.maxPotencia !== null ||
+      state.minPrice !== null ||
+      state.maxPrice !== null
+    );
+  }
+
   private executeFilterLogic(state: FilterState): void {
+    const searchLower = state.searchTerm.toLowerCase().trim();
     this.filteredMotorcycles = this.allMotorcycles.filter(moto => {
+      // Model name search (case-insensitive)
+      if (searchLower !== '' && !moto.name.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+
       // Brand filter
       if (state.brands.length > 0 && !state.brands.includes(moto.brand)) {
         return false;
@@ -118,13 +135,25 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
         return false;
       }
 
+      // Price range
+      const price = moto.price ?? 0;
+      if (state.minPrice !== null && price < state.minPrice) {
+        return false;
+      }
+      if (state.maxPrice !== null && price > state.maxPrice) {
+        return false;
+      }
+
       return true;
     });
   }
 
   private syncFiltersToUrl(state: FilterState): void {
     const queryParams: any = {};
-    
+
+    if (state.searchTerm) {
+      queryParams.search = state.searchTerm;
+    }
     if (state.brands.length > 0) {
       queryParams.marca = state.brands.join(',');
     }
@@ -137,13 +166,22 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     if (state.maxPotencia !== null) {
       queryParams.max_cv = state.maxPotencia;
     }
+    if (state.minPrice !== null) {
+      queryParams.min_price = state.minPrice;
+    }
+    if (state.maxPrice !== null) {
+      queryParams.max_price = state.maxPrice;
+    }
 
-    // Navigate to update URL query parameters without reloading component
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
       replaceUrl: true
     });
+  }
+
+  removeSearch(): void {
+    this.filterService.setSearchTerm('');
   }
 
   removeBrand(brand: string): void {
@@ -160,6 +198,14 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
 
   removePotencia(): void {
     this.filterService.updateFilters({ maxPotencia: null });
+  }
+
+  removeMinPrice(): void {
+    this.filterService.updateFilters({ minPrice: null });
+  }
+
+  removeMaxPrice(): void {
+    this.filterService.updateFilters({ maxPrice: null });
   }
 
   clearFilters(): void {

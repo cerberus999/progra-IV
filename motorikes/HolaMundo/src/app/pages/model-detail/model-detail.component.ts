@@ -4,9 +4,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { MotorcycleService } from '../../core/services/motorcycle.service';
 import { Motorcycle } from '../../core/models/motorcycle.model';
+import { AuthService } from '../../core/services/auth.service';
 import { BrandBadgeComponent } from '../../shared/components/brand-badge/brand-badge.component';
 import { SpecPanelComponent } from './spec-panel/spec-panel.component';
 import { BottomNavComponent } from './bottom-nav/bottom-nav.component';
+import { SaleModalComponent } from './sale-modal/sale-modal.component';
 import { PriceFormatPipe } from '../../shared/pipes/price-format.pipe';
 
 @Component({
@@ -18,6 +20,7 @@ import { PriceFormatPipe } from '../../shared/pipes/price-format.pipe';
     BrandBadgeComponent,
     SpecPanelComponent,
     BottomNavComponent,
+    SaleModalComponent,
     PriceFormatPipe
   ],
   templateUrl: './model-detail.component.html',
@@ -32,13 +35,15 @@ export class ModelDetailComponent implements OnInit, OnDestroy {
   adjacentModels: { prev: Motorcycle | null; next: Motorcycle | null } = { prev: null, next: null };
   currentIndex = 0;
   totalCount = 0;
+  showSaleModal = false;
 
   private sub = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private motorcycleService: MotorcycleService,
-    private cdr: ChangeDetectorRef
+    public auth: AuthService,
+    public cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {

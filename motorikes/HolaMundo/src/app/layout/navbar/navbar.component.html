@@ -43,10 +43,31 @@
       >
         CONTACTO
       </a>
+      <a *ngIf="auth.isLoggedIn"
+        [routerLink]="['/mi-historial']"
+        routerLinkActive="text-primary after:scale-x-100"
+        class="font-technical text-xs tracking-widest text-outline hover:text-primary transition-colors duration-300 relative py-2 after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
+      >
+        MI HISTORIAL
+      </a>
     </div>
 
-    <!-- Desktop CTA Button -->
-    <div class="hidden md:block">
+    <!-- Desktop CTA + Auth -->
+    <div class="hidden md:flex items-center gap-3">
+      <a [routerLink]="['/login']"
+         class="flex items-center gap-1.5 font-technical text-xs tracking-widest text-outline hover:text-primary transition-colors duration-300"
+      >
+        <span class="material-symbols-outlined text-base">account_circle</span>
+        {{ auth.isLoggedIn ? auth.currentUser?.username : 'INGRESAR' }}
+      </a>
+      <button *ngIf="auth.isLoggedIn"
+              (click)="logout()"
+              class="flex items-center gap-1 font-technical text-[10px] tracking-widest text-outline/50 hover:text-red-400 transition-colors duration-300"
+              title="Cerrar sesión"
+      >
+        <span class="material-symbols-outlined text-sm">logout</span>
+        SALIR
+      </button>
       <a [routerLink]="['/']" fragment="contacto" class="btn-primary py-2 px-5 text-xs tracking-widest">
         COTIZAR
       </a>
@@ -101,7 +122,27 @@
       >
         CONTACTO
       </a>
-      
+      <a *ngIf="auth.isLoggedIn"
+        [routerLink]="['/mi-historial']"
+        (click)="closeMobileMenu()"
+        class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1"
+      >
+        MI HISTORIAL
+      </a>
+      <a [routerLink]="['/login']"
+         (click)="closeMobileMenu()"
+         class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1 flex items-center gap-2"
+      >
+        <span class="material-symbols-outlined text-base">account_circle</span>
+        {{ auth.isLoggedIn ? auth.currentUser?.username : 'INGRESAR' }}
+      </a>
+      <button *ngIf="auth.isLoggedIn"
+               (click)="logout()"
+              class="font-technical text-sm tracking-widest text-outline hover:text-red-400 transition-colors duration-300 py-1 flex items-center gap-2 text-left"
+      >
+        <span class="material-symbols-outlined text-base">logout</span>
+        CERRAR SESIÓN
+      </button>
       <a 
         [routerLink]="['/']" 
         fragment="contacto" 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface FilterState {
+  searchTerm: string;
   brands: string[];
   types: string[];
   minCilindrada: number | null;
@@ -13,6 +14,7 @@ export interface FilterState {
 }
 
 const initialFilterState: FilterState = {
+  searchTerm: '',
   brands: [],
   types: [],
   minCilindrada: null,
@@ -90,5 +92,12 @@ export class FilterService {
     }
     
     this.updateFilters({ types: updated });
+  }
+
+  /**
+   * Helper to set search term for model name filter.
+   */
+  setSearchTerm(term: string): void {
+    this.updateFilters({ searchTerm: term });
   }
 }

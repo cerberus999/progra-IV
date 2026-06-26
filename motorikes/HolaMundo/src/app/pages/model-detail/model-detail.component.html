@@ -106,19 +106,41 @@
           </div>
         </div>
 
-        <!-- Price -->
-        <div class="flex items-baseline gap-3 mb-8 border-b border-border-hairline/30 pb-6">
-          <span class="font-rajdhani font-bold text-4xl text-gradient">
-            {{ motorcycle.price | priceFormat }}
-          </span>
-          <span class="font-label-sm text-outline text-[10px] uppercase tracking-wider">USD Ref.</span>
+        <!-- Price & Stock -->
+        <div class="flex items-baseline justify-between mb-8 border-b border-border-hairline/30 pb-6">
+          <div class="flex items-baseline gap-3">
+            <span class="font-rajdhani font-bold text-4xl text-gradient">
+              {{ motorcycle.price | priceFormat }}
+            </span>
+            <span class="font-label-sm text-outline text-[10px] uppercase tracking-wider">USD Ref.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-label-sm text-[10px] uppercase tracking-wider text-outline">Stock</span>
+            <span class="font-rajdhani font-bold text-lg"
+                  [class.text-green-400]="(motorcycle.stock ?? 0) > 3"
+                  [class.text-yellow-400]="(motorcycle.stock ?? 0) > 0 && (motorcycle.stock ?? 0) <= 3"
+                  [class.text-red-400]="(motorcycle.stock ?? 0) === 0">
+              {{ motorcycle.stock ?? 0 }}
+            </span>
+          </div>
         </div>
 
         <!-- Spec Sections Accordion -->
         <app-spec-panel [specs]="motorcycle.specs"></app-spec-panel>
 
+        <!-- Admin Sale Button -->
+        <div *ngIf="auth.currentUser?.rol === 'admin'" class="mt-10">
+          <button 
+            (click)="showSaleModal = true; cdr.markForCheck()"
+            class="btn-primary w-full py-3.5 text-center flex items-center justify-center gap-2 border border-yellow-500/30 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
+          >
+            <span class="material-symbols-outlined text-lg">sell</span>
+            REGISTRAR VENTA
+          </button>
+        </div>
+
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 mt-10">
+        <div class="flex flex-col sm:flex-row gap-4 mt-4">
           <a 
             [routerLink]="['/']" 
             fragment="contacto"
@@ -149,6 +171,13 @@
     [totalCount]="totalCount"
   ></app-bottom-nav>
 </div>
+
+<!-- Sale Modal -->
+<app-sale-modal
+  [motorcycle]="motorcycle"
+  [authUser]="auth.currentUser"
+  [(visible)]="showSaleModal"
+></app-sale-modal>
 
 <!-- Loading state -->
 <div *ngIf="!motorcycle" class="min-h-screen bg-background flex items-center justify-center">
