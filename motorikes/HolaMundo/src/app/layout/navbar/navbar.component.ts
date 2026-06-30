@@ -45,9 +45,4 @@ export class NavbarComponent {
     this.isMobileMenuOpen = false;
   }
 
-  async logout(): Promise<void> {
-    await this.authService.signOut();
-    this.closeMobileMenu();
-    this.router.navigate(['/']);
-  }
 }

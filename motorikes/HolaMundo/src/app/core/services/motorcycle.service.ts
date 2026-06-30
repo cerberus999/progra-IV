@@ -1,10 +1,64 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, lastValueFrom } from 'rxjs';
 import { map, shareReplay, catchError } from 'rxjs/operators';
 import { Motorcycle } from '../models/motorcycle.model';
 import { Brand } from '../models/brand.model';
 import { CatalogApiService } from './catalog-api.service';
+import { AdminApiService } from './admin-api.service';
 import { adaptMotoResponse } from './moto-adapter';
+import { MotoResponseDto, MotoRequestDto } from '../models/api-response.model';
+
+function extractNumericId(id: string): number {
+  return parseInt(id.replace('moto-', ''), 10);
+}
+
+function motoToRequestDto(bike: Partial<Motorcycle> & { name?: string; brand?: string }): Partial<MotoRequestDto> {
+  const s = bike.specs;
+  return {
+    idDistribuidor: 1,
+    marca: bike.brand ?? '',
+    modelo: bike.name ?? '',
+    año: bike.year_range ? parseInt(bike.year_range, 10) : new Date().getFullYear(),
+    tipo: bike.type ?? '',
+    cilindradaCc: s?.motor?.cilindrada_cc ?? null,
+    precioImportacion: bike.price ?? 0,
+    precioVenta: bike.price ?? 0,
+    stock: bike.stock ?? 0,
+    color: null,
+    imagenUrl: bike.image ?? null,
+    estado: bike.visible === false ? 'oculto' : 'disponible',
+    refrigeracion: s?.motor?.refrigeracion ?? null,
+    potenciaCv: s?.motor?.potencia_cv ?? null,
+    potenciaRpm: s?.motor?.potencia_rpm ?? null,
+    torqueNm: s?.motor?.torque_nm ?? null,
+    torqueRpm: s?.motor?.torque_rpm ?? null,
+    alimentacion: s?.motor?.alimentacion ?? null,
+    transmision: s?.motor?.transmision ?? null,
+    velocidadMaxKmh: s?.motor?.velocidad_max_kmh ?? null,
+    diametroCarrera: s?.motor?.diametro_carrera ?? null,
+    relacionCompresion: s?.motor?.relacion_compresion ?? null,
+    potenciaRamAirCv: s?.motor?.potencia_con_ram_air_cv ?? null,
+    arranque: s?.motor?.arranque ?? null,
+    chasisTipo: s?.chasis?.tipo ?? null,
+    suspensionDelantera: s?.chasis?.suspension_delantera ?? null,
+    suspensionTrasera: s?.chasis?.suspension_trasera ?? null,
+    amortiguadorDireccion: s?.chasis?.amortiguador_direccion ?? null,
+    frenoDelantero: s?.frenos?.delantero ?? null,
+    frenoTrasero: s?.frenos?.trasero ?? null,
+    frenoAsistencia: s?.frenos?.asistencia ?? null,
+    neumaticoDelantero: s?.neumaticos?.delantero ?? null,
+    neumaticoTrasero: s?.neumaticos?.trasero ?? null,
+    pesoKg: s?.dimensiones?.peso_kg ?? null,
+    pesoSecoKg: s?.dimensiones?.peso_seco_kg ?? null,
+    pesoMarchaKg: s?.dimensiones?.peso_marcha_kg ?? null,
+    depositoLitros: s?.dimensiones?.deposito_litros ?? null,
+    alturaAsientoMm: s?.dimensiones?.altura_asiento_mm ?? null,
+    distanciaEjesMm: s?.dimensiones?.distancia_ejes_mm ?? null,
+    distanciaSueloMm: s?.dimensiones?.distancia_suelo_mm ?? null,
+    maleteroLitros: s?.dimensiones?.maletero_litros ?? null,
+    electronica: s?.electronica?.join(',') ?? null
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -51,9 +105,19 @@ export class MotorcycleService {
   ];
 
   private allMotorcycles$: Observable<Motorcycle[]>;
+  private allAdminMotorcycles$: Observable<Motorcycle[]>;
 
-  constructor(private api: CatalogApiService) {
+  constructor(
+    private api: CatalogApiService,
+    private adminApi: AdminApiService
+  ) {
     this.allMotorcycles$ = this.api.getAll().pipe(
+      map(dtos => dtos.map(adaptMotoResponse)),
+      catchError(() => of([] as Motorcycle[])),
+      shareReplay(1)
+    );
+
+    this.allAdminMotorcycles$ = this.adminApi.getAllMotos().pipe(
       map(dtos => dtos.map(adaptMotoResponse)),
       catchError(() => of([] as Motorcycle[])),
       shareReplay(1)
@@ -62,6 +126,10 @@ export class MotorcycleService {
 
   getAll(): Observable<Motorcycle[]> {
     return this.allMotorcycles$;
+  }
+
+  getAllAdmin(): Observable<Motorcycle[]> {
+    return this.allAdminMotorcycles$;
   }
 
   getByBrand(brand: string): Observable<Motorcycle[]> {
@@ -112,85 +180,74 @@ export class MotorcycleService {
   // ADMIN CRUD OPERATIONS
   // =========================================================
 
-  /**
-   * Uploads an image to Supabase Storage and returns the public URL.
-   */
-  async uploadProductImage(file: File, filename: string): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const cleanFilename = `${filename.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.${fileExt}`;
-
-    const { error } = await supabase.storage
-      .from('productos-imagenes')
-      .upload(cleanFilename, file);
-
-    if (error) {
-      throw error;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('productos-imagenes')
-      .getPublicUrl(cleanFilename);
-
-    return publicUrl;
+  async uploadProductImage(file: File, _filename: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Error al leer la imagen'));
+      reader.readAsDataURL(file);
+    });
   }
 
-  /**
-   * Inserts a new motorcycle product.
-   */
-  async create(bike: Omit<Motorcycle, 'id' | 'slug'>): Promise<{ success: boolean; error?: string }> {
-    const id = 'bike-' + Math.random().toString(36).substr(2, 9);
-    const slug = `${bike.brand.toLowerCase()}-${bike.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-
-    const { error } = await supabase
-      .from('motorcycles')
-      .insert({
-        id,
-        slug,
-        ...bike
-      });
-
-    if (error) {
-      return { success: false, error: error.message };
+  async create(bike: Partial<Motorcycle> & { name: string; brand: string }): Promise<{ success: boolean; error?: string }> {
+    try {
+      const dto = motoToRequestDto(bike) as MotoRequestDto;
+      await lastValueFrom(this.adminApi.createMoto(dto));
+      this.refreshCache();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.error?.message || err.message || 'Error al crear' };
     }
-
-    // Invalidate cache
-    this.motorcycles = [];
-    return { success: true };
   }
 
-  /**
-   * Updates an existing motorcycle product.
-   */
   async update(id: string, updates: Partial<Motorcycle>): Promise<{ success: boolean; error?: string }> {
-    const { error } = await supabase
-      .from('motorcycles')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) {
-      return { success: false, error: error.message };
+    try {
+      const numericId = extractNumericId(id);
+      const current = await lastValueFrom(this.adminApi.getMotoById(numericId));
+      const merged = { ...motoToRequestDto(updates), idDistribuidor: current.idDistribuidor, marca: current.marca, modelo: current.modelo, año: current.año } as MotoRequestDto;
+      const dto: MotoRequestDto = {
+        ...merged,
+        marca: updates.brand ?? current.marca,
+        modelo: (updates as any).name ?? current.modelo,
+        año: updates.year_range ? parseInt(updates.year_range, 10) : current.año,
+        precioVenta: updates.price ?? current.precioVenta,
+        stock: updates.stock ?? current.stock,
+        imagenUrl: updates.image ?? current.imagenUrl,
+        estado: updates.visible === false ? 'oculto' : updates.visible === true ? 'disponible' : current.estado
+      };
+      await lastValueFrom(this.adminApi.updateMoto(numericId, dto));
+      this.refreshCache();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.error?.message || err.message || 'Error al actualizar' };
     }
-
-    // Invalidate cache
-    this.motorcycles = [];
-    return { success: true };
   }
 
-  /**
-   * Performs a soft delete by marking stock=0 and visible=false.
-   */
   async delete(id: string): Promise<{ success: boolean; error?: string }> {
-    const { error } = await supabase
-      .from('motorcycles')
-      .update({ visible: false, stock: 0 })
-      .eq('id', id);
-
-    if (error) {
-      return { success: false, error: error.message };
+    try {
+      const numericId = extractNumericId(id);
+      const current = await lastValueFrom(this.adminApi.getMotoById(numericId));
+      const dto = motoToRequestDto(current) as MotoRequestDto;
+      dto.stock = 0;
+      dto.estado = 'oculto';
+      await lastValueFrom(this.adminApi.updateMoto(numericId, dto));
+      this.refreshCache();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.error?.message || err.message || 'Error al eliminar' };
     }
+  }
 
-    // Invalidate cache
-    this.motorcycles = [];
-    return { success: true };
+  private refreshCache(): void {
+    this.allMotorcycles$ = this.api.getAll().pipe(
+      map(dtos => dtos.map(adaptMotoResponse)),
+      catchError(() => of([] as Motorcycle[])),
+      shareReplay(1)
+    );
+    this.allAdminMotorcycles$ = this.adminApi.getAllMotos().pipe(
+      map(dtos => dtos.map(adaptMotoResponse)),
+      catchError(() => of([] as Motorcycle[])),
+      shareReplay(1)
+    );
   }
 }

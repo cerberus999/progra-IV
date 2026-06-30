@@ -29,6 +29,7 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
   isLoading = false;
 
   activeFilters: FilterState = {
+    searchTerm: '',
     brands: [],
     types: [],
     minCilindrada: null,

@@ -99,7 +99,7 @@ export class LoginComponent {
       next: (user) => {
         this.loading = false;
         if (user.rol === 'admin') {
-          this.router.navigate(['/catalogo']);
+          this.router.navigate(['/admin']);
         } else {
           this.router.navigate(['/']);
         }

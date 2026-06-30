@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ClienteRequest, ClienteResponse, VentaRequest, VentaResponse } from '../models/admin.model';
 import { RegisterRequest } from '../models/auth.model';
+import { MotoResponseDto, MotoRequestDto } from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,5 +28,25 @@ export class AdminApiService {
 
   registerUser(data: RegisterRequest): Observable<HttpResponse<void>> {
     return this.http.post<void>(`${this.baseUrl}/usuarios`, data, { observe: 'response' });
+  }
+
+  getAllMotos(): Observable<MotoResponseDto[]> {
+    return this.http.get<MotoResponseDto[]>(`${this.baseUrl}/motos`);
+  }
+
+  getMotoById(id: number): Observable<MotoResponseDto> {
+    return this.http.get<MotoResponseDto>(`${this.baseUrl}/motos/${id}`);
+  }
+
+  createMoto(data: MotoRequestDto): Observable<MotoResponseDto> {
+    return this.http.post<MotoResponseDto>(`${this.baseUrl}/motos`, data);
+  }
+
+  updateMoto(id: number, data: MotoRequestDto): Observable<MotoResponseDto> {
+    return this.http.put<MotoResponseDto>(`${this.baseUrl}/motos/${id}`, data);
+  }
+
+  deleteMoto(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/motos/${id}`);
   }
 }

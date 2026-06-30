@@ -24,11 +24,7 @@ import { PriceFormatPipe } from '../../pipes/price-format.pipe';
           </span>
         </div>
         
-        <div *ngIf="motorcycle.badge_special" class="absolute top-3 right-3 z-10">
-          <span class="text-[9px] font-technical font-semibold bg-primary-container text-white px-2 py-0.5 rounded-full shadow-md animate-pulse">
-            {{ motorcycle.badge_special }}
-          </span>
-        </div>
+
 
         <img 
           [src]="motorcycle.image" 

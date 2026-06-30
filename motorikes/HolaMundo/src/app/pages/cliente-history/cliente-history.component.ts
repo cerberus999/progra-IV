@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ClienteApiService } from '../../core/services/cliente-api.service';
 import { UnidadCliente, ServicioMantenimiento, GarantiaPosventa, ReclamoTecnico, SolicitudRepuesto } from '../../core/models/cliente.model';
@@ -8,7 +7,7 @@ import { UnidadCliente, ServicioMantenimiento, GarantiaPosventa, ReclamoTecnico,
 @Component({
   selector: 'app-cliente-history',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="min-h-screen bg-background pt-28 pb-24">
       <div class="max-w-container-max mx-auto px-6 md:px-margin-desktop">

@@ -151,7 +151,7 @@ import { Brand } from '../../core/models/brand.model';
             <span class="material-symbols-outlined text-outline text-6xl mb-4 animate-pulse">database</span>
             <h3 class="font-rajdhani font-bold text-lg text-on-surface uppercase tracking-wider mb-1">Inventario Vacío</h3>
             <p class="font-body-md text-xs text-outline max-w-sm mx-auto">
-              No hay motocicletas registradas en Supabase. Utiliza el botón "Nuevo Producto" para añadir la primera moto.
+              No hay motocicletas registradas en el sistema. Utiliza el botón "Nuevo Producto" para añadir la primera moto.
             </p>
           </div>
         </div>
@@ -204,15 +204,9 @@ import { Brand } from '../../core/models/brand.model';
                     </select>
                   </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="flex flex-col gap-1.5">
-                    <label class="font-rajdhani font-semibold text-[10px] tracking-widest text-outline uppercase">Precio (USD)</label>
-                    <input type="number" formControlName="price" placeholder="Ej. 5500" class="admin-input" />
-                  </div>
-                  <div class="flex flex-col gap-1.5">
-                    <label class="font-rajdhani font-semibold text-[10px] tracking-widest text-outline uppercase">Etiqueta Especial (Opcional)</label>
-                    <input type="text" formControlName="badge_special" placeholder="Ej. EDICIÓN ESPECIAL" class="admin-input" />
-                  </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-rajdhani font-semibold text-[10px] tracking-widest text-outline uppercase">Precio (USD)</label>
+                  <input type="number" formControlName="price" placeholder="Ej. 5500" class="admin-input" />
                 </div>
               </div>
             </div>
@@ -229,7 +223,7 @@ import { Brand } from '../../core/models/brand.model';
                   </div>
                   <div class="flex-1 flex flex-col gap-2">
                     <label class="font-technical text-[10px] text-outline">
-                      Sube una imagen con fondo transparente en formato PNG. Se almacenará de manera segura en Supabase Storage.
+                      Sube una imagen con fondo transparente en formato PNG.
                     </label>
                     <input 
                       type="file" 
@@ -425,8 +419,7 @@ export class AdminPortalComponent implements OnInit {
       brand: ['', Validators.required],
       year_range: ['', Validators.required],
       type: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0)]],
-      badge_special: [''],
+        price: [0, [Validators.required, Validators.min(0)]],
       
       // Spec: Motor
       motor_tipo: ['', Validators.required],
@@ -518,7 +511,6 @@ export class AdminPortalComponent implements OnInit {
         year_range: bike.year_range,
         type: bike.type,
         price: bike.price,
-        badge_special: bike.badge_special || '',
         
         motor_tipo: bike.specs.motor.tipo,
         motor_cilindrada: bike.specs.motor.cilindrada_cc,
@@ -637,7 +629,6 @@ export class AdminPortalComponent implements OnInit {
         year_range: formVal.year_range,
         type: formVal.type,
         price: formVal.price,
-        badge_special: formVal.badge_special || null,
         image: imageUrl,
         specs: specs
       };

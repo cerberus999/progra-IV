@@ -61,7 +61,6 @@ export interface Motorcycle {
   type: string;
   image: string;
   brand: string; // The brand identifier: kawasaki, honda, yamaha, suzuki
-  badge_special?: string;
   specs: MotorcycleSpecs;
   price?: number; // Add price field for filtering and display
   stock?: number;

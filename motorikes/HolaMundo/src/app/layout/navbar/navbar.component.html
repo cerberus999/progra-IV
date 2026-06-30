@@ -74,7 +74,7 @@
         COTIZAR
       </a>
       <button 
-        *ngIf="authService.userProfile$ | async"
+        *ngIf="auth.currentUser"
         (click)="logout()" 
         class="btn-ghost py-2 px-5 text-xs tracking-widest uppercase hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20"
       >
@@ -151,8 +151,8 @@
         CERRAR SESIÓN
       </button>
       <a 
-        *ngIf="authService.userProfile$ | async; let profile"
-        [class.hidden]="profile.role !== 'admin'"
+        *ngIf="auth.currentUser"
+        [class.hidden]="auth.currentUser?.rol !== 'admin'"
         [routerLink]="['/admin']" 
         (click)="closeMobileMenu()"
         class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1"
@@ -162,7 +162,7 @@
       
       <div class="border-t border-outline-variant/20 pt-4 flex flex-col gap-4">
         <a 
-          *ngIf="!(authService.userProfile$ | async)"
+          *ngIf="!auth.currentUser"
           [routerLink]="['/login']" 
           (click)="closeMobileMenu()"
           class="font-technical text-sm text-center tracking-widest text-outline hover:text-primary transition-colors duration-300 py-2 border border-border-hairline rounded-lg"
@@ -170,7 +170,7 @@
           INICIAR SESIÓN
         </a>
         <a 
-          *ngIf="!(authService.userProfile$ | async)"
+          *ngIf="!auth.currentUser"
           [routerLink]="['/contacto']" 
           (click)="closeMobileMenu()"
           class="btn-primary w-full text-center py-3 tracking-widest"
@@ -178,7 +178,7 @@
           COTIZAR AHORA
         </a>
         <button 
-          *ngIf="authService.userProfile$ | async"
+          *ngIf="auth.currentUser"
           (click)="logout()" 
           class="btn-ghost w-full py-3 tracking-widest text-center uppercase border border-red-500/20 text-red-400 hover:bg-red-500/10"
         >

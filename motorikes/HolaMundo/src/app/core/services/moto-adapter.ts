@@ -67,7 +67,7 @@ export function adaptMotoResponse(dto: MotoResponseDto): Motorcycle {
     type: dto.tipo ?? '',
     image: dto.imagenUrl ?? '',
     brand: dto.distribuidorNombre.toLowerCase(),
-    badge_special: undefined,
+    visible: dto.estado !== 'oculto',
     specs,
     price: dto.precioVenta,
     stock: dto.stock

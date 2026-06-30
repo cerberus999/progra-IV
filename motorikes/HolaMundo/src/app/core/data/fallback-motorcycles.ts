@@ -1,7 +1,7 @@
 import { Motorcycle } from '../models/motorcycle.model';
 
 /**
- * Local fallback data used when Supabase is unavailable or the table doesn't exist yet.
+ * Local fallback data used when the API is unavailable.
  * This ensures the catalog always displays motorcycles to the user.
  */
 export const FALLBACK_MOTORCYCLES: Motorcycle[] = [
@@ -32,7 +32,7 @@ export const FALLBACK_MOTORCYCLES: Motorcycle[] = [
   {
     id: 'kaw-03', slug: 'kawasaki-ninja-h2r', name: 'Ninja H2R', year_range: '2015–presente',
     type: 'TRACK', image: 'assets/images/motos/kawasaki3.png', brand: 'kawasaki', price: 55000,
-    badge_special: 'SOLO CIRCUITO', stock: 1, visible: true,
+    stock: 1, visible: true,
     specs: {
       motor: { tipo: '4 cilindros en línea, Supercharged', cilindrada_cc: 998, refrigeracion: 'Líquida', potencia_cv: 310, potencia_rpm: 14000, torque_nm: 165, torque_rpm: 12500, alimentacion: 'Inyección doble inyector 50mm', transmision: '6 velocidades dog-ring, KQS', velocidad_max_kmh: 400 },
       chasis: { tipo: 'Multitubular Trellis acero', suspension_delantera: 'KYB AOS-II invertida 43mm', suspension_trasera: 'Öhlins TTX36' },
@@ -56,7 +56,7 @@ export const FALLBACK_MOTORCYCLES: Motorcycle[] = [
   {
     id: 'kaw-05', slug: 'kawasaki-kx250f', name: 'KX250F', year_range: '2017–2018',
     type: 'OFF-ROAD', image: 'assets/images/motos/kawasaki5.png', brand: 'kawasaki', price: 7200,
-    badge_special: 'MOTOCROSS', stock: 1, visible: true,
+    stock: 1, visible: true,
     specs: {
       motor: { tipo: 'Monocilíndrico, 4T, DOHC, 4v', cilindrada_cc: 249, refrigeracion: 'Líquida', potencia_cv: 40, potencia_rpm: 12500, torque_nm: 29, torque_rpm: 9000, alimentacion: 'Inyección digital Keihin 43mm', transmision: '5 velocidades, cadena', velocidad_max_kmh: 130 },
       chasis: { tipo: 'Perimetral de aluminio', suspension_delantera: 'Showa SFF invertida 48mm, 310mm', suspension_trasera: 'Uni-Trak Showa, 310mm' },
