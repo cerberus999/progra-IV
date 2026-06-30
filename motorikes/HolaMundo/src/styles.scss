@@ -5,3 +5,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './app/assets/styles/global.scss';
+@import './app/assets/styles/animations.scss';
+
+html, body {
+  background-color: #08060F;
+  color: #E8DFEE;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}

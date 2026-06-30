@@ -107,4 +107,90 @@ export class MotorcycleService {
       })
     );
   }
+
+  // =========================================================
+  // ADMIN CRUD OPERATIONS
+  // =========================================================
+
+  /**
+   * Uploads an image to Supabase Storage and returns the public URL.
+   */
+  async uploadProductImage(file: File, filename: string): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const cleanFilename = `${filename.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from('productos-imagenes')
+      .upload(cleanFilename, file);
+
+    if (error) {
+      throw error;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('productos-imagenes')
+      .getPublicUrl(cleanFilename);
+
+    return publicUrl;
+  }
+
+  /**
+   * Inserts a new motorcycle product.
+   */
+  async create(bike: Omit<Motorcycle, 'id' | 'slug'>): Promise<{ success: boolean; error?: string }> {
+    const id = 'bike-' + Math.random().toString(36).substr(2, 9);
+    const slug = `${bike.brand.toLowerCase()}-${bike.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+    const { error } = await supabase
+      .from('motorcycles')
+      .insert({
+        id,
+        slug,
+        ...bike
+      });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Invalidate cache
+    this.motorcycles = [];
+    return { success: true };
+  }
+
+  /**
+   * Updates an existing motorcycle product.
+   */
+  async update(id: string, updates: Partial<Motorcycle>): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase
+      .from('motorcycles')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Invalidate cache
+    this.motorcycles = [];
+    return { success: true };
+  }
+
+  /**
+   * Performs a soft delete by marking stock=0 and visible=false.
+   */
+  async delete(id: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase
+      .from('motorcycles')
+      .update({ visible: false, stock: 0 })
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Invalidate cache
+    this.motorcycles = [];
+    return { success: true };
+  }
 }

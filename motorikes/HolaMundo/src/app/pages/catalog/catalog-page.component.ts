@@ -28,8 +28,18 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
   filteredMotorcycles: Motorcycle[] = [];
   isLoading = false;
 
-  activeFilters!: FilterState;
+  activeFilters: FilterState = {
+    brands: [],
+    types: [],
+    minCilindrada: null,
+    maxCilindrada: null,
+    minPotencia: null,
+    maxPotencia: null,
+    minPrice: null,
+    maxPrice: null
+  };
   hasActiveFilters = false;
+  debugLogs: string[] = [];
 
   private sub = new Subscription();
   private isFirstFilter = true;
@@ -42,9 +52,16 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
   ) { }
 
+  log(msg: string): void {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    this.debugLogs.push(`[${timestamp}] ${msg}`);
+    console.log(`[${timestamp}] ${msg}`);
+  }
+
   ngOnInit(): void {
     this.motorcycleService.getAll().subscribe(motos => {
       this.allMotorcycles = motos;
+      this.log(`Loaded ${motos.length} motorcycles from service`);
       this.initFiltersFromUrlAndSubscribe();
       this.cdr.markForCheck();
     });
@@ -116,22 +133,22 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
       }
 
       // Brand filter
-      if (state.brands.length > 0 && !state.brands.includes(moto.brand)) {
+      if (state.brands && state.brands.length > 0 && !state.brands.includes(moto.brand)) {
         return false;
       }
       
       // Type filter
-      if (state.types.length > 0 && !state.types.includes(moto.type.toUpperCase())) {
+      if (state.types && state.types.length > 0 && !state.types.includes(moto.type.toUpperCase())) {
         return false;
       }
 
       // Displacement filter
-      if (state.maxCilindrada !== null && moto.specs.motor.cilindrada_cc > state.maxCilindrada) {
+      if (state.maxCilindrada !== null && state.maxCilindrada < 1100 && moto.specs.motor.cilindrada_cc > state.maxCilindrada) {
         return false;
       }
 
       // Horsepower filter
-      if (state.maxPotencia !== null && moto.specs.motor.potencia_cv > state.maxPotencia) {
+      if (state.maxPotencia !== null && state.maxPotencia < 320 && moto.specs.motor.potencia_cv > state.maxPotencia) {
         return false;
       }
 
@@ -157,13 +174,13 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     if (state.brands.length > 0) {
       queryParams.marca = state.brands.join(',');
     }
-    if (state.types.length > 0) {
+    if (state.types && state.types.length > 0) {
       queryParams.tipo = state.types.join(',');
     }
-    if (state.maxCilindrada !== null) {
+    if (state.maxCilindrada !== null && state.maxCilindrada < 1100) {
       queryParams.max_cc = state.maxCilindrada;
     }
-    if (state.maxPotencia !== null) {
+    if (state.maxPotencia !== null && state.maxPotencia < 320) {
       queryParams.max_cv = state.maxPotencia;
     }
     if (state.minPrice !== null) {

@@ -30,15 +30,17 @@
         CATÁLOGO
       </a>
       <a 
-        [routerLink]="['/']" 
-        fragment="garantias"
+        [routerLink]="['/garantias']" 
+        routerLinkActive="text-primary after:scale-x-100"
+        [routerLinkActiveOptions]="{exact: true}"
         class="font-technical text-xs tracking-widest text-outline hover:text-primary transition-colors duration-300 relative py-2 after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
       >
         GARANTÍAS
       </a>
       <a 
-        [routerLink]="['/']" 
-        fragment="contacto"
+        [routerLink]="['/contacto']" 
+        routerLinkActive="text-primary after:scale-x-100"
+        [routerLinkActiveOptions]="{exact: true}"
         class="font-technical text-xs tracking-widest text-outline hover:text-primary transition-colors duration-300 relative py-2 after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
       >
         CONTACTO
@@ -71,6 +73,13 @@
       <a [routerLink]="['/']" fragment="contacto" class="btn-primary py-2 px-5 text-xs tracking-widest">
         COTIZAR
       </a>
+      <button 
+        *ngIf="authService.userProfile$ | async"
+        (click)="logout()" 
+        class="btn-ghost py-2 px-5 text-xs tracking-widest uppercase hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20"
+      >
+        CERRAR SESIÓN
+      </button>
     </div>
 
     <!-- Mobile Menu Button -->
@@ -107,16 +116,14 @@
         CATÁLOGO
       </a>
       <a 
-        [routerLink]="['/']" 
-        fragment="garantias" 
+        [routerLink]="['/garantias']" 
         (click)="closeMobileMenu()"
         class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1"
       >
         GARANTÍAS
       </a>
       <a 
-        [routerLink]="['/']" 
-        fragment="contacto" 
+        [routerLink]="['/contacto']" 
         (click)="closeMobileMenu()"
         class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1"
       >
@@ -144,13 +151,40 @@
         CERRAR SESIÓN
       </button>
       <a 
-        [routerLink]="['/']" 
-        fragment="contacto" 
+        *ngIf="authService.userProfile$ | async; let profile"
+        [class.hidden]="profile.role !== 'admin'"
+        [routerLink]="['/admin']" 
         (click)="closeMobileMenu()"
-        class="btn-primary w-full text-center py-3 tracking-widest mt-2"
+        class="font-technical text-sm tracking-widest text-outline hover:text-primary transition-colors duration-300 py-1"
       >
-        COTIZAR AHÓRA
+        ADMINISTRACIÓN
       </a>
+      
+      <div class="border-t border-outline-variant/20 pt-4 flex flex-col gap-4">
+        <a 
+          *ngIf="!(authService.userProfile$ | async)"
+          [routerLink]="['/login']" 
+          (click)="closeMobileMenu()"
+          class="font-technical text-sm text-center tracking-widest text-outline hover:text-primary transition-colors duration-300 py-2 border border-border-hairline rounded-lg"
+        >
+          INICIAR SESIÓN
+        </a>
+        <a 
+          *ngIf="!(authService.userProfile$ | async)"
+          [routerLink]="['/contacto']" 
+          (click)="closeMobileMenu()"
+          class="btn-primary w-full text-center py-3 tracking-widest"
+        >
+          COTIZAR AHORA
+        </a>
+        <button 
+          *ngIf="authService.userProfile$ | async"
+          (click)="logout()" 
+          class="btn-ghost w-full py-3 tracking-widest text-center uppercase border border-red-500/20 text-red-400 hover:bg-red-500/10"
+        >
+          CERRAR SESIÓN
+        </button>
+      </div>
     </div>
   </div>
 </nav>

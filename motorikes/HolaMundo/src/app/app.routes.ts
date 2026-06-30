@@ -20,6 +20,18 @@ export const routes: Routes = [
     data: { animation: 'catalog' }
   },
   { 
+    path: 'garantias', 
+    component: GuaranteesPageComponent, 
+    title: 'HirosimaBikeMotors — Garantías',
+    data: { animation: 'guarantees' }
+  },
+  { 
+    path: 'contacto', 
+    component: ContactPageComponent, 
+    title: 'HirosimaBikeMotors — Contacto',
+    data: { animation: 'contact' }
+  },
+  { 
     path: 'moto/:slug', 
     component: ModelDetailComponent,
     title: 'HirosimaBikeMotors — Modelo',
